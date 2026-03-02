@@ -1,0 +1,25 @@
+# Build output
+target/
+dist/
+
+# Dependencies
+node_modules/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# 原型图 & 文档
+管理员+商家web.html
+商家小程序.html
+用户+外卖.html
+开发.md
+支付沙箱.md

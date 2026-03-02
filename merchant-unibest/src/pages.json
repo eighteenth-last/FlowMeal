@@ -1,0 +1,30 @@
+{
+  "pages": [
+    { "path": "pages/login/index", "style": { "navigationBarTitleText": "商家登录", "navigationStyle": "custom" } },
+    { "path": "pages/orders/index", "style": { "navigationBarTitleText": "订单处理", "navigationStyle": "custom" } },
+    { "path": "pages/products/index", "style": { "navigationBarTitleText": "餐品管理", "navigationStyle": "custom" } },
+    { "path": "pages/product-edit/index", "style": { "navigationBarTitleText": "编辑餐品" } },
+    { "path": "pages/stats/index", "style": { "navigationBarTitleText": "营业数据", "navigationStyle": "custom" } },
+    { "path": "pages/shop/index", "style": { "navigationBarTitleText": "我的店铺", "navigationStyle": "custom" } }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "FlowMeal商家",
+    "navigationBarBackgroundColor": "#FFD100",
+    "backgroundColor": "#f5f5f5",
+    "app-plus": { "titleNView": false }
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#999999",
+    "selectedColor": "#1a1a1a",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      { "pagePath": "pages/orders/index", "text": "处理" },
+      { "pagePath": "pages/products/index", "text": "餐品" },
+      { "pagePath": "pages/stats/index", "text": "数据" },
+      { "pagePath": "pages/shop/index", "text": "店铺" }
+    ]
+  }
+}

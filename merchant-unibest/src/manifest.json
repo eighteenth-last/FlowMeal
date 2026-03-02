@@ -1,0 +1,12 @@
+{
+  "name": "FlowMeal商家端",
+  "appid": "",
+  "description": "FlowMeal 商家端小程序",
+  "versionName": "1.0.0",
+  "versionCode": "100",
+  "transformPx": false,
+  "h5": {
+    "router": { "mode": "hash" },
+    "devServer": { "port": 5177 }
+  }
+}

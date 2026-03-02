@@ -1,0 +1,87 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: flowmeal-backend
+
+  # 数据库配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/flowmeal?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: qwer4321
+
+  # Redis 配置
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+      database: 0
+      timeout: 3000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-wait: -1ms
+          max-idle: 8
+          min-idle: 0
+
+  # Spring Cache（使用 Redis）
+  cache:
+    type: redis
+    redis:
+      time-to-live: 300000  # 5分钟，毫秒
+
+  # Jackson 配置
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+    default-property-inclusion: non_null
+
+# MyBatis-Plus 配置
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      id-type: assign_id       # 使用雪花算法生成 ID
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  mapper-locations: classpath*:/mapper/**/*.xml
+
+# Sa-Token 配置
+sa-token:
+  token-name: Authorization
+  timeout: 2592000        # 30天
+  active-timeout: -1
+  is-concurrent: true
+  is-share: true
+  token-style: uuid
+  is-log: false
+
+# 支付宝沙箱配置
+alipay:
+  app-id: "9021000161684485"
+  gateway-url: https://openapi-sandbox.dl.alipaydev.com/gateway.do
+  private-key: "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCL7sx0ja3aXozV6WksEkPehk5lHTLjNh08LE1fGhrWmSyS7TusVah1jymS+FEvz10CoDb87XUkHs6Pe0xL+sfXJJS3Y6a1jcLbsIUweYDIydiyxPAkl3ZDS9iKShnO/VtUjC53Z3t4cIz/Oxdrb2JxZcB+9XUaweyPRvsUHEOIlasGMSixYCjvBk8ymF7tK2E/W4viglotD74AgZW46zlErfKZTKIEw302gXpALnL20l7WKfMoGJ0rg2dWH7Hdvva7gm9wyO/GH9/4pY3BFO8hby7xah7Y2934ePGP8cHVPs6ubCVwymfdcKvanpwL+Ca6mCU3/qCgZ16EiJYS73BhAgMBAAECggEAEPzIbU3V0TCxQDa5wdPl0VnUoonM57BmFCv8qJLutyaZNqz+FYnAjaT3kxP6JyexTuRMSKA7HEtxIBIDzSWApSmXtDuwvVGcWjcvtBbL/5QhbnJiBM8uWDUY8JDWWT6Am974tR4m6xQeyc1Opog7FzEXEVKTCNCJ+0rOqD5WJHp4TiPDWuUr5MuDuHp5SKlkywZBz6H+8L8wfpGHnMJuGJzSddRiIivrqEiC2s0GGNCS8QlsrizC3JZcs5+5TDyhhPY4fA1jZU/jceYkDSJq1nN7sdTQ3xHcNkPUVT9w0AQUAxQ38RRumvDyt2xhMS1cV6TUfaGWdU11ogZV3HAnUQKBgQDgUt0rJeQDE7pcLaCheQBsEe7QH2ZmUs8eOCjoCUoEyLfku1QpPOvtNfq7AX13sBDICibi02sQKtGYBtDgekXRpCO0ipkAA4fzNjncQnDDkmeWXpe50X6c7qPbIQK52z+BHUuZe4MKQj71HintHiL5WfAC0BRqlUJZnq7VQfAQ7wKBgQCfsUQ9bVmxcQDEbWhudHe/4QC4e8+st7CwVFDB0czfsk+JNm4crBqPew0EYhcEnOeQ0xRBYaGML+QX1k8LsctVLUI9NQZhtVwNIuaL73BNQJJnG35C7MM2vN0c1YVspMOU5fAvHjIjlEIilNfEwmBC99nPsj29WeqeuGrwek/zrwKBgQCNidtA6VR32I/Cr4tlttpcVehP6zAKKf/DOn4dAhdw81CMguI0btsRvfho3CTVSwMbpMQqZGluNwYuHUbYDG5XO3DH7pdhGdlCzRku78EEtTClASRMu3FfBXffwHFe4YatKdXUjsj8xRXCRXkAwv4gRO4aaD4pjenicCwyJLubgwKBgEQPrWHw5TV3UDhn2QaapR8mqsP2IQEgGTJN/U1eOc9tk/CLPksCHx/f9iBUHjNdHGThUdS747p3/uMZ9/6n/F2FOKIVo26peV4v7crediK2zq8bTKkBeAIwZJ0RdBhl8OXZSpEKcZwwaC+M+JlnrtdcA30+HopBdHnJZ+qudr0JAoGALTPH7/uG6ayx4BkbvAB6jcYLuteFt+8vnBLaNMnYQpj2LWg2jqz/VXiozRb9eeX9b8rRbAxAudxdxFWqkhvaRbJFg4YhziZ5frl2BMb+x8oFi4SgdAwOJ6/uNIBp4d+EgNG4d9bk0UqO6sDQr0rzCCS/ilD6338G0n44zRS9znI="
+  alipay-public-key: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkGYfXDGL69+FDaw/DxEK/e50TUuH3I4nXNB163f/sBPmek4XAXjY7MRDO8xFWU2B2ApsOR40bmAqFaIvEo/iGtICpEQvFbO9Q8VUOUTDFqqPrvNILhMk5wtnLe+Jm/VJP5iWVDISEdzuPD+gFEPqXGwTx9icnKi/q38jUr9EqxKyhq0jRCyO/STS/Nxovf6IZbmStHmBUfZg8Zc8WSg0wuXTue33zjmvkCfH/Y7jM4UT+9Fx5BfSm46lqNHVvyTDbtfROqEz2obuLUWjLTWCxi1ARTIQsZ/gotRJxAPJCh1afWmo9yDU87tANjKqZMs8bvG6u/xQ+3CiSHlVvU2rWQIDAQAB"
+  notify-url: http://127.0.0.1:8080/api/payment/alipay/notify
+  return-url: http://127.0.0.1:8080/api/payment/alipay/return
+
+# Knife4j API 文档
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+    swagger-model-name: 实体类列表
+
+# 日志配置
+logging:
+  level:
+    com.flowmeal: debug
+    org.springframework.web: info

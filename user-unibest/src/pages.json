@@ -1,0 +1,32 @@
+{
+  "pages": [
+    { "path": "pages/login/index", "style": { "navigationBarTitleText": "登录", "navigationStyle": "custom" } },
+    { "path": "pages/home/index", "style": { "navigationBarTitleText": "首页", "navigationStyle": "custom" } },
+    { "path": "pages/shop/index", "style": { "navigationBarTitleText": "店铺详情", "navigationStyle": "custom" } },
+    { "path": "pages/order-confirm/index", "style": { "navigationBarTitleText": "确认订单" } },
+    { "path": "pages/order-list/index", "style": { "navigationBarTitleText": "我的订单", "navigationStyle": "custom" } },
+    { "path": "pages/order-track/index", "style": { "navigationBarTitleText": "订单追踪", "navigationStyle": "custom" } },
+    { "path": "pages/profile/index", "style": { "navigationBarTitleText": "我的", "navigationStyle": "custom" } },
+    { "path": "pages/address-list/index", "style": { "navigationBarTitleText": "我的地址" } },
+    { "path": "pages/address-edit/index", "style": { "navigationBarTitleText": "编辑地址" } }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "FlowMeal",
+    "navigationBarBackgroundColor": "#FFD100",
+    "backgroundColor": "#f8f9fa",
+    "app-plus": { "titleNView": false }
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#999999",
+    "selectedColor": "#1a1a1a",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      { "pagePath": "pages/home/index", "text": "首页" },
+      { "pagePath": "pages/order-list/index", "text": "订单" },
+      { "pagePath": "pages/profile/index", "text": "我的" }
+    ]
+  }
+}
