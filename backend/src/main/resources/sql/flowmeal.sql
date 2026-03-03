@@ -336,4 +336,103 @@ INSERT INTO `user` VALUES (2003, 'user3', '13900000003', '$2a$10$EErwBWI7xVEux9i
 INSERT INTO `user` VALUES (2004, 'user4', '13900000004', '$2a$10$EErwBWI7xVEux9i4gupiFOcAqhFQ/haVykeMxgLh3lM3Hjh81oV2K', NULL, '小丽', 1, 0, '2026-03-02 23:26:32', '2026-03-02 23:26:32');
 INSERT INTO `user` VALUES (2005, 'user5', '13900000005', '$2a$10$EErwBWI7xVEux9i4gupiFOcAqhFQ/haVykeMxgLh3lM3Hjh81oV2K', NULL, '小张', 1, 0, '2026-03-02 23:26:32', '2026-03-02 23:26:32');
 
+-- ----------------------------
+-- Table structure for material_report
+-- ----------------------------
+DROP TABLE IF EXISTS `material_report`;
+CREATE TABLE `material_report`  (
+  `id` bigint NOT NULL COMMENT '记录ID',
+  `merchant_id` bigint NOT NULL COMMENT '商家ID',
+  `material_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '原料名称',
+  `consumed` int NOT NULL COMMENT '消耗量',
+  `unit` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'kg' COMMENT '单位',
+  `report_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '上报时间',
+  `deleted` tinyint NOT NULL DEFAULT 0 COMMENT '逻辑删除',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_merchant_id`(`merchant_id` ASC) USING BTREE,
+  INDEX `idx_report_time`(`report_time` ASC) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '原料消耗上报记录表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of material_report
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for supplier
+-- ----------------------------
+DROP TABLE IF EXISTS `supplier`;
+CREATE TABLE `supplier`  (
+  `id` bigint NOT NULL COMMENT '供应商ID',
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '供应商名称',
+  `contact` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '联系人',
+  `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '联系电话',
+  `address` varchar(300) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '供应商地址',
+  `category` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '供应类别（如：粮油/蔬菜/肉类）',
+  `status` tinyint NOT NULL DEFAULT 1 COMMENT '状态: 1=合作中 0=停用',
+  `remark` varchar(300) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '备注',
+  `deleted` tinyint NOT NULL DEFAULT 0 COMMENT '逻辑删除',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_status`(`status` ASC) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '供应商表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of supplier
+-- ----------------------------
+INSERT INTO `supplier` VALUES (8001, '绿源食材', '张经理', '13900001001', '杭州市余杭区仓前路88号', '蔬菜', 1, NULL, 0, '2026-03-03 00:00:00', '2026-03-03 00:00:00');
+INSERT INTO `supplier` VALUES (8002, '鲜味供应商', '李总', '13900001002', '杭州市萧山区金惠路100号', '肉类', 1, NULL, 0, '2026-03-03 00:00:00', '2026-03-03 00:00:00');
+INSERT INTO `supplier` VALUES (8003, '金鸿粮油', '王老板', '13900001003', '杭州市滨江区江南大道200号', '粮油', 1, NULL, 0, '2026-03-03 00:00:00', '2026-03-03 00:00:00');
+
+-- ----------------------------
+-- Table structure for procurement_order
+-- ----------------------------
+DROP TABLE IF EXISTS `procurement_order`;
+CREATE TABLE `procurement_order`  (
+  `id` bigint NOT NULL COMMENT '采购单ID',
+  `supplier` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '供应商',
+  `material_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '原料名称',
+  `quantity` int NOT NULL COMMENT '采购数量',
+  `unit` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'kg' COMMENT '单位',
+  `remark` varchar(300) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '备注',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'PENDING' COMMENT '状态: PENDING=待发货 SHIPPED=已发货 DELIVERED=已到货',
+  `deleted` tinyint NOT NULL DEFAULT 0 COMMENT '逻辑删除',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_status`(`status` ASC) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '采购单表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of procurement_order
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for coupon
+-- ----------------------------
+DROP TABLE IF EXISTS `coupon`;
+CREATE TABLE `coupon`  (
+  `id` bigint NOT NULL COMMENT '优惠券ID',
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '券名称',
+  `type` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'FULL_REDUCTION' COMMENT '类型: FULL_REDUCTION/DISCOUNT/NEW_USER',
+  `value` decimal(10, 2) NOT NULL COMMENT '面值/折扣值',
+  `min_amount` decimal(10, 2) NOT NULL DEFAULT 0.00 COMMENT '使用门槛',
+  `total` int NOT NULL DEFAULT 0 COMMENT '总发行量 0=不限',
+  `claimed_count` int NOT NULL DEFAULT 0 COMMENT '已领取数量',
+  `start_time` datetime NULL DEFAULT NULL COMMENT '有效期开始',
+  `end_time` datetime NULL DEFAULT NULL COMMENT '有效期结束',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'ACTIVE' COMMENT '状态: ACTIVE=生效 INACTIVE=停用',
+  `deleted` tinyint NOT NULL DEFAULT 0 COMMENT '逻辑删除',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_status`(`status` ASC) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '优惠券表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of coupon
+-- ----------------------------
+
 SET FOREIGN_KEY_CHECKS = 1;

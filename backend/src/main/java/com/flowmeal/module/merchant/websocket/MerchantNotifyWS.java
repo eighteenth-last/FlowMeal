@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * WebSocket 服务端 - 商家实时新订单通知
  *
- * 前端连接地址: ws://localhost:8080/api/ws/merchant/{merchantId}
+ * 前端连接地址: ws://localhost:8012/api/ws/merchant/{merchantId}
  * 服务端推送: MerchantNotifyWS.sendToMerchant(merchantId, message)
  */
 @Slf4j

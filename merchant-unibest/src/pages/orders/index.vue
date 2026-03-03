@@ -198,7 +198,7 @@ const connectWs = () => {
   const token = uni.getStorageSync('fm_merchant_token')
   if (!merchantId || !token) return
 
-  const wsUrl = `ws://localhost:8080/api/ws/merchant/${merchantId}?token=${token}`
+  const wsUrl = `ws://localhost:8012/api/ws/merchant/${merchantId}?token=${token}`
   const ws = uni.connectSocket({ url: wsUrl, complete: () => {} })
   uni.onSocketMessage((res) => {
     try {

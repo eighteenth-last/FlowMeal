@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Knife4j / OpenAPI 3 文档配置
- * 文档访问地址: http://localhost:8080/api/doc.html
+ * 文档访问地址: http://localhost:8012/api/doc.html
  */
 @Configuration
 public class Knife4jConfig {

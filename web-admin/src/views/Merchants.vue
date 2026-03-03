@@ -60,13 +60,13 @@ const statusOptions = [
   { label: '已驳回', value: 'REJECTED' }
 ]
 
-const statusTagType = { PENDING: 'warning', APPROVED: 'success', REJECTED: 'error' }
-const statusLabel = { PENDING: '待审核', APPROVED: '已通过', REJECTED: '已驳回' }
+const statusTagType = { PENDING: 'warning', APPROVED: 'success', REJECTED: 'error', 0: 'warning', 1: 'success', 2: 'error' }
+const statusLabel = { PENDING: '待审核', APPROVED: '已通过', REJECTED: '已驳回', 0: '待审核', 1: '已通过', 2: '已驳回' }
 
 const columns = [
   { title: 'ID', key: 'id', width: 80 },
   { title: '店铺名称', key: 'shopName' },
-  { title: '联系人', key: 'contactName' },
+  { title: '联系人', key: 'username' },
   { title: '手机号', key: 'phone' },
   {
     title: '审核状态', key: 'auditStatus',
@@ -76,13 +76,14 @@ const columns = [
   { title: '入驻时间', key: 'createdAt' },
   {
     title: '操作', key: 'actions',
-    render: row => h(NSpace, {}, {
-      default: () => [
-        row.auditStatus === 'PENDING'
-          ? h(NButton, { size: 'small', type: 'primary', onClick: () => openAudit(row) }, { default: () => '审核' })
-          : null
-      ].filter(Boolean)
-    })
+    render: row => {
+      // API 返回的 auditStatus 可能是数字(1) 或者是字符串('PENDING')
+      const isPending = row.auditStatus === 0 || row.auditStatus === 'PENDING' || row.auditStatus === '0';
+      if (isPending) {
+        return h(NButton, { size: 'small', type: 'primary', onClick: () => openAudit(row) }, { default: () => '审核' })
+      }
+      return h('span', { style: 'color: #999' }, '已处理')
+    }
   }
 ]
 

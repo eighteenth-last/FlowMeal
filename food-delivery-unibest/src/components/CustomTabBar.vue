@@ -25,14 +25,14 @@ const currentIndex = ref(props.current)
 watch(() => props.current, (val) => { currentIndex.value = val })
 
 const tabs = [
-  { pagePath: '/pages/hall/index', text: '大厅', icon: 'fa-fire' },
-  { pagePath: '/pages/records/index', text: '记录', icon: 'fa-clipboard-list' },
-  { pagePath: '/pages/profile/index', text: '我的', icon: 'fa-user' }
+  { pagePath: '/pages/hall/index', text: '大厅', icon: 'fa-layer-group' },
+  { pagePath: '/pages/delivery/index', text: '配送', icon: 'fa-truck-fast' },
+  { pagePath: '/pages/records/index', text: '统计', icon: 'fa-chart-line' },
+  { pagePath: '/pages/profile/index', text: '我的', icon: 'fa-motorcycle' }
 ]
 
 const switchTab = (tab, index) => {
-  if (currentIndex.value === index) return
-  currentIndex.value = index
+  // if (currentIndex.value === index) return
   uni.switchTab({ url: tab.pagePath })
 }
 </script>

@@ -20,6 +20,11 @@ public class SaTokenConfig implements WebMvcConfigurer {
             SaRouter.match("/auth/**").stop();
             SaRouter.match("/doc.html", "/v3/**", "/swagger-ui/**", "/webjars/**").stop();
             SaRouter.match("/payment/alipay/notify", "/payment/alipay/return").stop();
+            SaRouter.match("/payment/callback/**").stop();  // 支付回调无需登录
+            SaRouter.match("/shop/**").stop();               // 公开店铺商品浏览
+
+            // 管理员专属接口
+            SaRouter.match("/admin/**").check(r -> StpUtil.checkRole("ADMIN"));
 
             // 商家专属接口
             SaRouter.match("/merchant/**").check(r -> StpUtil.checkRole("MERCHANT"));

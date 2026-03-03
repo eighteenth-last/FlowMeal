@@ -3,6 +3,9 @@ import { get, put } from '@/utils/request'
 /** 抢单大厅 */
 export const getHallOrders = (params) => get('/order/rider/hall', params)
 
+/** 我的在途订单列表 */
+export const getRiderOrders = (params) => get('/order/rider/active', params)
+
 /** 订单详情 */
 export const getOrderDetail = (orderId) => get(`/order/${orderId}`)
 

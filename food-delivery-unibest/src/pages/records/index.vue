@@ -1,61 +1,68 @@
 <template>
   <view class="records-page">
-    <!-- 头部统计 -->
     <view class="records-header">
-      <text class="header-title">配送记录</text>
-      <view class="stats-row">
-        <view class="stat-box">
-          <text class="stat-num">{{ totalOrders }}</text>
-          <text class="stat-label">总配送单</text>
+      <view class="header-title">历史统计</view>
+      <view class="stats-overview">
+        <view class="stat-main">
+          <text class="label">本周收入 (元)</text>
+          <text class="value">1,280.50</text>
         </view>
-        <view class="stat-box">
-          <text class="stat-num">{{ avgDuration }}</text>
-          <text class="stat-label">平均时长(分)</text>
+        <view class="stat-chart">
+           <!-- CSS Bar Chart Simulation -->
+           <view class="bar-col" v-for="(h, i) in [40, 60, 30, 80, 50, 90, 70]" :key="i">
+             <view class="bar" :style="{ height: h + '%' }"></view>
+             <text class="day">{{ ['S','M','T','W','T','F','S'][i] }}</text>
+           </view>
         </view>
-        <view class="stat-box">
-          <text class="stat-num text-primary">{{ totalDistance }}</text>
-          <text class="stat-label">总里程(km)</text>
+      </view>
+
+      <view class="mini-stats">
+        <view class="mini-stat">
+          <text class="num">{{ totalOrders }}</text>
+          <text class="desc">总订单</text>
+        </view>
+        <view class="mini-stat">
+          <text class="num">{{ avgDuration }}</text>
+          <text class="desc">平均耗时(分)</text>
+        </view>
+        <view class="mini-stat">
+          <text class="num">{{ totalDistance }}</text>
+          <text class="desc">总里程(km)</text>
         </view>
       </view>
     </view>
 
-    <!-- 记录列表 -->
     <scroll-view scroll-y class="record-list" @scrolltolower="loadMore">
-      <view class="record-card" v-for="record in records" :key="record.id">
-        <view class="record-top">
-          <view class="record-badge">
-            <text class="fa fa-route" style="color:#FFD100;font-size:22rpx;"></text>
-          </view>
-          <view class="record-info">
-            <text class="record-order-no font-bold">订单 #{{ record.orderId }}</text>
-            <text class="record-time text-gray">{{ record.createdAt }}</text>
-          </view>
-        </view>
-        <view class="record-stats">
-          <view class="record-stat">
-            <text class="fa fa-clock text-gray" style="font-size:22rpx;"></text>
-            <text>{{ record.durationMin || '--' }} 分钟</text>
-          </view>
-          <view class="record-stat">
-            <text class="fa fa-road text-gray" style="font-size:22rpx;"></text>
-            <text>{{ record.distanceKm || '--' }} km</text>
+      <view class="list-title">最近配送</view>
+      
+      <view class="record-item" v-for="record in records" :key="record.id">
+        <view class="item-left">
+          <view class="date-box">
+             <text class="day">{{ record.createdAt ? record.createdAt.substring(8,10) : '01' }}</text>
+             <text class="month">{{ record.createdAt ? record.createdAt.substring(5,7) : '01' }}月</text>
           </view>
         </view>
-        <view class="record-timeline text-gray" style="font-size:22rpx;">
-          <text v-if="record.acceptTime">接单 {{ record.acceptTime }}</text>
-          <text v-if="record.completeTime"> → 完成 {{ record.completeTime }}</text>
+        <view class="item-body">
+          <view class="order-no">订单 #{{ record.orderId }}</view>
+          <view class="order-meta">
+            <text class="meta-tag">{{ record.distanceKm }}km</text>
+            <text class="meta-tag">{{ record.durationMin }}min</text>
+            <text class="time">{{ record.completeTime ? record.completeTime.substring(11,16) : '--:--' }}</text>
+          </view>
+        </view>
+        <view class="item-right">
+          <text class="income">+{{ record.income || '5.0' }}</text>
         </view>
       </view>
 
       <view v-if="!loading && records.length === 0" class="empty-tip">
-        <text class="fa fa-clipboard-list" style="font-size:64rpx;color:#ddd;"></text>
-        <text class="text-gray">暂无配送记录</text>
+        <text class="fa fa-clipboard-list"></text>
+        <text>暂无配送记录</text>
       </view>
-
-      <view v-if="loading" class="loading-tip text-gray">加载中...</view>
+      <view v-if="loading" class="loading-tip">加载中...</view>
     </scroll-view>
 
-    <CustomTabBar :current="1" />
+    <CustomTabBar :current="2" />
   </view>
 </template>
 
@@ -81,56 +88,159 @@ const totalDistance = computed(() => {
 const loadRecords = async () => {
   loading.value = true
   try {
-    const res = await getDeliveryRecords({ page: page.value, size: 50 })
-    records.value = res?.records || []
+    const res = await getDeliveryRecords({ page: page.value, size: 20 })
+    if (page.value === 1) records.value = res.records || []
+    else records.value = [...records.value, ...res.records || []]
   } catch (e) {} finally { loading.value = false }
 }
 
 const loadMore = () => { page.value++; loadRecords() }
 
 onMounted(() => {
-  const token = uni.getStorageSync('fm_rider_token')
-  if (!token) {
-    uni.reLaunch({ url: '/pages/login/index' })
-    return
-  }
   loadRecords()
 })
 </script>
 
-<style scoped>
-.records-page { min-height: 100vh; background: #f5f5f5; padding-bottom: 160rpx; }
+<style>
+.records-page {
+  min-height: 100vh;
+  background-color: #f3f4f6;
+  padding-bottom: 200rpx;
+}
 
 .records-header {
-  background: #1a1a1a; padding: 80rpx 30rpx 50rpx; color: #fff;
-  border-radius: 0 0 40rpx 40rpx;
+  background-color: #111827;
+  color: white;
+  padding: 40rpx 40rpx 80rpx;
+  border-bottom-left-radius: 60rpx;
+  border-bottom-right-radius: 60rpx;
+  position: relative;
+  z-index: 10;
 }
-.header-title { font-size: 40rpx; font-weight: bold; display: block; margin-bottom: 30rpx; padding-top: 20rpx; }
-.stats-row { display: flex; justify-content: space-around; }
-.stat-box { display: flex; flex-direction: column; align-items: center; gap: 8rpx; }
-.stat-num { font-size: 44rpx; font-weight: bold; }
-.stat-label { font-size: 22rpx; color: rgba(255,255,255,0.5); }
 
-.record-list { padding: 20rpx 30rpx; height: calc(100vh - 350rpx); }
-
-.record-card {
-  background: #fff; border-radius: 20rpx; padding: 24rpx; margin-bottom: 16rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
+.header-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  margin-bottom: 40rpx;
+  text-align: center;
 }
-.record-top { display: flex; align-items: center; gap: 16rpx; margin-bottom: 16rpx; }
-.record-badge {
-  width: 50rpx; height: 50rpx; background: #fffbeb; border-radius: 12rpx;
-  display: flex; align-items: center; justify-content: center;
+
+.stats-overview {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 40rpx;
 }
-.record-info { flex: 1; display: flex; flex-direction: column; gap: 4rpx; }
-.record-order-no { font-size: 28rpx; }
-.record-time { font-size: 22rpx; }
 
-.record-stats { display: flex; gap: 40rpx; margin-bottom: 10rpx; }
-.record-stat { display: flex; align-items: center; gap: 8rpx; font-size: 26rpx; }
+.stat-main {
+  display: flex;
+  flex-direction: column;
+}
+.stat-main .label { font-size: 24rpx; color: #9ca3af; margin-bottom: 8rpx; }
+.stat-main .value { font-size: 60rpx; font-weight: bold; color: #facc15; line-height: 1; }
 
-.record-timeline { padding-top: 10rpx; border-top: 2rpx solid #f8f8f8; }
+.stat-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 12rpx;
+  height: 80rpx;
+}
+.bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+}
+.bar {
+  width: 8rpx;
+  background-color: #4b5563;
+  border-radius: 4rpx;
+}
+.bar-col:nth-child(even) .bar { background-color: #6b7280; }
+.bar-col:last-child .bar { background-color: #facc15; }
+.day { font-size: 16rpx; color: #6b7280; }
 
-.empty-tip { text-align: center; padding: 120rpx 0; display: flex; flex-direction: column; align-items: center; gap: 20rpx; }
-.loading-tip { text-align: center; padding: 40rpx; font-size: 26rpx; }
+.mini-stats {
+  display: flex;
+  justify-content: space-between;
+  background-color: rgba(255,255,255,0.1);
+  padding: 30rpx;
+  border-radius: 30rpx;
+}
+.mini-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+}
+.mini-stat .num { font-size: 32rpx; font-weight: bold; }
+.mini-stat .desc { font-size: 20rpx; color: #9ca3af; }
+
+.record-list {
+  padding: 0 40rpx;
+  margin-top: -60rpx;
+  position: relative;
+  z-index: 20;
+  height: calc(100vh - 450rpx);
+}
+
+.list-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #111827;
+  margin-bottom: 24rpx;
+  padding-left: 10rpx;
+}
+
+.record-item {
+  background-color: white;
+  border-radius: 30rpx;
+  padding: 30rpx;
+  margin-bottom: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.03);
+}
+
+.item-left {
+  margin-right: 24rpx;
+}
+.date-box {
+  background-color: #f3f4f6;
+  border-radius: 20rpx;
+  width: 100rpx;
+  height: 100rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.date-box .day { font-size: 36rpx; font-weight: bold; color: #111827; line-height: 1; }
+.date-box .month { font-size: 20rpx; color: #6b7280; margin-top: 4rpx; }
+
+.item-body {
+  flex: 1;
+}
+.order-no { font-size: 28rpx; font-weight: bold; color: #111827; margin-bottom: 8rpx; }
+.order-meta { display: flex; align-items: center; gap: 12rpx; }
+.meta-tag {
+  font-size: 20rpx;
+  background-color: #eff6ff;
+  color: #3b82f6;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+}
+.time { font-size: 20rpx; color: #9ca3af; margin-left: auto; }
+
+.item-right {
+  display: flex;
+  align-items: center;
+}
+.income { font-size: 32rpx; font-weight: bold; color: #facc15; }
+
+.empty-tip, .loading-tip {
+  text-align: center; color: #9ca3af; padding: 40rpx; font-size: 26rpx; display: flex; flex-direction: column; align-items: center; gap: 16rpx;
+}
+.empty-tip .fa { font-size: 48rpx; opacity: 0.5; }
 </style>

@@ -295,6 +295,7 @@ public class OrderServiceImpl implements OrderService {
     public Page<Orders> listMerchantOrders(Long merchantId, String status, int page, int size) {
         LambdaQueryWrapper<Orders> wrapper = new LambdaQueryWrapper<Orders>()
                 .eq(Orders::getMerchantId, merchantId)
+                .ne(Orders::getUserId, 0L)   // 排除 POS 线下订单（userId=0）
                 .orderByDesc(Orders::getCreatedAt);
         if (status != null && !status.isBlank()) {
             wrapper.eq(Orders::getStatus, status);

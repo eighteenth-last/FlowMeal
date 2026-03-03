@@ -8,7 +8,8 @@
     { "path": "pages/order-track/index", "style": { "navigationBarTitleText": "订单追踪", "navigationStyle": "custom" } },
     { "path": "pages/profile/index", "style": { "navigationBarTitleText": "我的", "navigationStyle": "custom" } },
     { "path": "pages/address-list/index", "style": { "navigationBarTitleText": "我的地址" } },
-    { "path": "pages/address-edit/index", "style": { "navigationBarTitleText": "编辑地址" } }
+    { "path": "pages/address-edit/index", "style": { "navigationBarTitleText": "编辑地址" } },
+    { "path": "pages/webview/index", "style": { "navigationBarTitleText": "支付", "navigationBarBackgroundColor": "#ffffff" } }
   ],
   "globalStyle": {
     "navigationBarTextStyle": "black",

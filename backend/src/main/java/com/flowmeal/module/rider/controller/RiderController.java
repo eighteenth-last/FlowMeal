@@ -47,10 +47,10 @@ public class RiderController {
 
     @Operation(summary = "切换在线/离线状态")
     @PutMapping("/online")
-    public Result<Void> toggleOnline(@RequestParam Integer onlineStatus) {
+    public Result<Void> toggleOnline(@RequestBody Rider req) {
         riderMapper.update(null, new LambdaUpdateWrapper<Rider>()
                 .eq(Rider::getId, getRiderId())
-                .set(Rider::getOnlineStatus, onlineStatus));
+                .set(Rider::getOnlineStatus, req.getOnlineStatus()));
         return Result.success();
     }
 

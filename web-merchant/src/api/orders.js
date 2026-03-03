@@ -12,7 +12,3 @@ export const rejectOrder = (id, reason) =>
 
 /** 订单详情 */
 export const getOrderDetail = (id) => request.get(`/order/${id}`)
-
-/** 标记已出餐/配送中 */
-export const updateOrderStatus = (id, status) =>
-  request.put(`/order/${id}/status`, { status })

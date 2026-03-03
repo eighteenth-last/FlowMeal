@@ -37,6 +37,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import VChart from 'vue-echarts'
+import { useMessage } from 'naive-ui'
 import { use } from 'echarts/core'
 import { LineChart, BarChart } from 'echarts/charts'
 import { GridComponent, TooltipComponent, LegendComponent } from 'echarts/components'
@@ -45,16 +46,20 @@ import { getTodaySummary, getRevenueTrend, getOrderTrend, getProductRank } from 
 
 use([LineChart, BarChart, GridComponent, TooltipComponent, LegendComponent, CanvasRenderer])
 
+const message = useMessage()
+
 const today = ref({})
 const revenueTrend = ref([])
 const orderTrend = ref([])
 const productRank = ref([])
 
+const fmt = (v) => v != null ? Number(v).toFixed(2) : undefined
+
 const todayCards = computed(() => [
-  { key: 'revenue',     label: '今日营业额',   value: today.value.revenue,     unit: '元' },
-  { key: 'orders',      label: '今日订单数',   value: today.value.orderCount,  unit: '单' },
-  { key: 'avgAmount',   label: '客单价',       value: today.value.avgAmount,   unit: '元' },
-  { key: 'newCustomers',label: '新客户数',     value: today.value.newCustomers, unit: '人' }
+  { key: 'revenue',     label: '今日营业额',   value: fmt(today.value.revenue),     unit: '元' },
+  { key: 'orders',      label: '今日订单数',   value: today.value.orderCount,        unit: '单' },
+  { key: 'avgAmount',   label: '客单价',       value: fmt(today.value.avgAmount),   unit: '元' },
+  { key: 'newCustomers',label: '新客户数',     value: today.value.newCustomers,      unit: '人' }
 ])
 
 const days = computed(() => revenueTrend.value.map(i => i.date))
@@ -78,7 +83,7 @@ const rankOption = computed(() => ({
   },
   yAxis: { type: 'value', name: '销售量' },
   series: [{
-    data: productRank.value.map(i => i.salesCount),
+    data: productRank.value.map(i => i.sales),
     type: 'bar',
     barMaxWidth: 40,
     itemStyle: { color: '#FFD100', borderRadius: [4, 4, 0, 0] }
@@ -94,13 +99,12 @@ onMounted(async () => {
     revenueTrend.value = rt || []
     orderTrend.value = ot || []
     productRank.value = (pr || []).slice(0, 10)
-  } catch {
-    // 使用模拟数据展示图表形态
-    const mockDays = ['1/4', '1/5', '1/6', '1/7', '1/8', '1/9', '1/10']
-    revenueTrend.value = mockDays.map((d, i) => ({ date: d, revenue: 800 + i * 120 + Math.random() * 200 | 0 }))
-    orderTrend.value   = mockDays.map((d, i) => ({ date: d, count: 20 + i * 3 + Math.random() * 10 | 0 }))
-    productRank.value  = ['黄金炒饭', '鱼香肉丝', '红烧肉', '番茄炒蛋', '辣椒炒肉'].map((n, i) => ({ name: n, salesCount: 80 - i * 12 }))
-    today.value = { revenue: '1,248.00', orderCount: 36, avgAmount: '34.67', newCustomers: 8 }
+  } catch (e) {
+    message.error('数据加载失败：' + (e.message || e))
+    today.value = {}
+    revenueTrend.value = []
+    orderTrend.value = []
+    productRank.value = []
   }
 })
 </script>

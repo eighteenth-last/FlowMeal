@@ -76,6 +76,7 @@ import { ref, onMounted } from 'vue'
 import { useCartStore } from '@/stores/cart'
 import { placeOrder } from '@/api/order'
 import { getAddresses } from '@/api/user'
+import { getAlipayH5Url } from '@/api/payment'
 
 const cartStore = useCartStore()
 const address = ref(null)
@@ -108,6 +109,15 @@ const handleSubmit = async () => {
       }))
     })
     cartStore.clear()
+    // 拉起支付宝 H5 支付
+    try {
+      const payUrl = await getAlipayH5Url(orderNo)
+      if (payUrl) {
+        uni.navigateTo({ url: `/pages/webview/index?url=${encodeURIComponent(payUrl)}` })
+        return
+      }
+    } catch (_) {}
+    // fallback: 直接跳订单追踪
     uni.showToast({ title: '下单成功', icon: 'success' })
     setTimeout(() => {
       uni.redirectTo({ url: `/pages/order-track/index?orderNo=${orderNo}` })

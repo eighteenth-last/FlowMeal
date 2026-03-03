@@ -1,250 +1,316 @@
-<template>
-  <view class="delivery-page">
-    <!-- 地图导航区域 -->
-    <view class="map-area">
-      <view id="deliveryMapContainer" class="delivery-map"></view>
-      <view class="map-back" @click="goBack">
-        <text class="fa fa-chevron-left" style="font-size:28rpx;"></text>
-      </view>
-      <!-- 重新定位按钮 -->
-      <view class="map-relocate" @click="relocate">
-        <text class="fa fa-location-crosshairs" style="font-size:28rpx;color:#333;"></text>
-      </view>
-      <!-- 地图图例 -->
-      <view class="map-legend">
-        <view class="legend-item">
-          <view class="legend-dot" style="background:#f59e0b;"></view>
-          <text style="font-size:22rpx;">取餐</text>
-        </view>
-        <view class="legend-item">
-          <view class="legend-dot" style="background:#22c55e;"></view>
-          <text style="font-size:22rpx;">送达</text>
-        </view>
+﻿<template>
+  <view class="delivery-list-page">
+    <!-- Header -->
+    <view class="list-header">
+      <view class="header-title">配送中</view>
+      <view class="header-stats">
+        <text class="stat-text">在途 {{ activeOrders.length }} 单</text>
       </view>
     </view>
 
-    <!-- 订单详情卡片 -->
-    <view class="detail-panel">
-      <!-- 地址信息 -->
-      <view class="addr-section">
-        <view class="addr-row">
-          <view class="dot dot-orange"></view>
-          <view class="addr-info">
-            <text class="addr-label text-gray">取餐地址</text>
-            <text class="addr-text font-bold">商家地址</text>
+    <!-- Active Orders List -->
+    <scroll-view scroll-y class="order-list" @scrolltolower="loadMore">
+      <!-- Empty State -->
+      <view v-if="!loading && activeOrders.length === 0" class="empty-state">
+        <view class="empty-icon-wrap">
+          <text class="fa fa-truck-fast empty-icon"></text>
+        </view>
+        <text class="empty-title">暂无配送订单</text>
+        <text class="empty-desc">去大厅抢单后，订单将在这里显示</text>
+        <view class="go-hall-btn" @click="goHall">前往抢单大厅</view>
+      </view>
+
+      <!-- Order Cards -->
+      <view
+        v-for="order in activeOrders"
+        :key="order.id"
+        class="order-card"
+        @click="goDetail(order.id)"
+      >
+        <!-- Card Header -->
+        <view class="card-header">
+          <view class="order-no-wrap">
+            <text class="order-no">订单 #{{ order.id }}</text>
+            <view class="status-badge" :class="getStatusClass(order.status)">
+              {{ statusLabel[order.status] || order.status }}
+            </view>
+          </view>
+          <text class="order-fee">+{{ order.deliveryFee || '5.00' }}</text>
+        </view>
+
+        <!-- Route Info -->
+        <view class="route-info">
+          <view class="route-point">
+            <view class="point-dot dot-blue"></view>
+            <view class="point-content">
+              <text class="point-label">取货</text>
+              <text class="point-addr">FlowMeal 商家 (#{{ order.merchantId || '--' }})</text>
+            </view>
+          </view>
+          <view class="route-connector"></view>
+          <view class="route-point">
+            <view class="point-dot dot-orange"></view>
+            <view class="point-content">
+              <text class="point-label">送达</text>
+              <text class="point-addr">{{ parseAddress(order.addressSnapshot) }}</text>
+            </view>
           </view>
         </view>
-        <view class="addr-line"></view>
-        <view class="addr-row">
-          <view class="dot dot-green"></view>
-          <view class="addr-info">
-            <text class="addr-label text-gray">送餐地址</text>
-            <text class="addr-text font-bold">{{ order.addressSnapshot || '收货地址' }}</text>
+
+        <!-- Card Footer -->
+        <view class="card-footer">
+          <text class="footer-time">
+            <text class="fa fa-clock"></text> 预计 30 分钟
+          </text>
+          <view class="detail-btn">
+            查看详情 <text class="fa fa-chevron-right"></text>
           </view>
         </view>
       </view>
 
-      <!-- 订单信息 -->
-      <view class="order-info-card">
-        <view class="info-top">
-          <text class="info-orderNo">订单 {{ order.orderNo }}</text>
-          <text class="info-amount">¥{{ order.actualAmount }}</text>
-        </view>
-        <view class="info-rows">
-          <view class="info-row">
-            <text class="text-gray">下单时间</text>
-            <text>{{ order.createdAt }}</text>
-          </view>
-          <view class="info-row" v-if="order.remark">
-            <text class="text-gray">备注</text>
-            <text>{{ order.remark }}</text>
-          </view>
-          <view class="info-row">
-            <text class="text-gray">状态</text>
-            <text class="font-bold text-primary">{{ statusLabel[order.status] || order.status }}</text>
-          </view>
-        </view>
+      <view v-if="loading" class="loading-row">
+        <text class="fa fa-spinner fa-spin"></text> 加载中...
       </view>
+    </scroll-view>
 
-      <!-- 操作按钮 -->
-      <view class="action-area">
-        <view class="action-btn-secondary" @click="callUser">
-          <text class="fa fa-phone" style="margin-right:8rpx;"></text>联系用户
-        </view>
-        <view class="action-btn-primary" @click="handleAction" v-if="nextAction">
-          <text :class="'fa fa-' + nextAction.icon" style="margin-right:8rpx;"></text>
-          {{ nextAction.label }}
-        </view>
-      </view>
-    </view>
+    <CustomTabBar :current="1" />
   </view>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
-import { getOrderDetail, acceptOrder, startDeliver, completeDeliver } from '@/api/order'
-import { initMap, addIconMarker, addPolyline, drivingRoute, fitView, getBrowserLocation } from '@/utils/amap'
+import { ref, onMounted } from 'vue'
+import { onShow } from '@dcloudio/uni-app'
+import { getRiderOrders } from '@/api/order'
+import CustomTabBar from '@/components/CustomTabBar.vue'
 
-const order = ref({})
-let mapInstance = null
+const activeOrders = ref([])
+const loading = ref(false)
+const page = ref(1)
 
 const statusLabel = {
-  MERCHANT_CONFIRMED: '待取餐',
-  RIDER_ACCEPTED: '骑手已接单',
-  DELIVERING: '配送中',
-  COMPLETED: '已完成'
+  MERCHANT_CONFIRMED: '待取货',
+  RIDER_ACCEPTED:     '前往商家',
+  DELIVERING:         '配送中',
+  COMPLETED:          '已完成',
 }
 
-const nextAction = computed(() => {
-  const s = order.value.status
-  if (s === 'MERCHANT_CONFIRMED') return { label: '接下这单', icon: 'hand-pointer', action: 'accept' }
-  if (s === 'RIDER_ACCEPTED') return { label: '已取餐，开始配送', icon: 'truck-fast', action: 'deliver' }
-  if (s === 'DELIVERING') return { label: '已送达', icon: 'circle-check', action: 'complete' }
-  return null
-})
+const getStatusClass = (status) => {
+  if (status === 'DELIVERING') return 'badge-blue'
+  if (status === 'RIDER_ACCEPTED') return 'badge-yellow'
+  if (status === 'COMPLETED') return 'badge-green'
+  return 'badge-gray'
+}
 
-const handleAction = async () => {
-  const action = nextAction.value?.action
-  if (!action) return
+const loadOrders = async (reset = false) => {
+  if (loading.value) return
+  if (reset) page.value = 1
+  loading.value = true
   try {
-    if (action === 'accept') await acceptOrder(order.value.id)
-    else if (action === 'deliver') await startDeliver(order.value.id)
-    else if (action === 'complete') await completeDeliver(order.value.id)
-    uni.showToast({ title: '操作成功', icon: 'success' })
-    await loadOrder()
-  } catch (e) {}
-}
-
-const callUser = () => {
-  uni.showToast({ title: '联系用户功能', icon: 'none' })
-}
-
-const goBack = () => uni.navigateBack()
-
-// 初始化配送地图
-const initDeliveryMap = async () => {
-  await nextTick()
-  setTimeout(async () => {
-    mapInstance = initMap('deliveryMapContainer', { zoom: 13 })
-    if (!mapInstance) return
-
-    // 商家坐标（实际从订单数据获取）
-    const shopLng = order.value.shopLng || 116.397428
-    const shopLat = order.value.shopLat || 39.90923
-    // 收货地址坐标
-    const addrLng = order.value.addressLng || 116.407428
-    const addrLat = order.value.addressLat || 39.91923
-
-    // 添加取餐标记（橙色）
-    addIconMarker(mapInstance, shopLng, shopLat,
-      '<i class="fa fa-store" style="color:#f59e0b;font-size:18px;"></i>',
-      { title: '取餐地址' })
-
-    // 添加送餐标记（绿色）
-    addIconMarker(mapInstance, addrLng, addrLat,
-      '<i class="fa fa-flag-checkered" style="color:#22c55e;font-size:18px;"></i>',
-      { title: '送餐地址' })
-
-    // 尝试绘制路线
-    try {
-      const route = await drivingRoute(shopLng, shopLat, addrLng, addrLat)
-      if (route.points.length > 0) {
-        addPolyline(mapInstance, route.points, { color: '#FFD100', weight: 6 })
-      }
-    } catch (e) {
-      // 路线规划失败，画直线
-      addPolyline(mapInstance, [[shopLng, shopLat], [addrLng, addrLat]], { color: '#FFD100', weight: 4 })
-    }
-    fitView(mapInstance)
-  }, 200)
-}
-
-// 重新定位
-const relocate = async () => {
-  try {
-    const loc = await getBrowserLocation()
-    if (mapInstance) {
-      mapInstance.setCenter([loc.lng, loc.lat])
-    }
+    const res = await getRiderOrders({ page: page.value, size: 10 })
+    const records = res.records || res || []
+    if (reset) activeOrders.value = records
+    else activeOrders.value = [...activeOrders.value, ...records]
   } catch (e) {
-    uni.showToast({ title: '定位失败', icon: 'none' })
+    // Mock data for UI preview
+    if (reset) {
+      activeOrders.value = [
+        {
+          id: 1501,
+          merchantId: 3,
+          status: 'DELIVERING',
+          deliveryFee: '8.50',
+          addressSnapshot: JSON.stringify({ address: '华润大厦 A座 1205' }),
+        },
+        {
+          id: 1500,
+          merchantId: 2,
+          status: 'RIDER_ACCEPTED',
+          deliveryFee: '6.00',
+          addressSnapshot: JSON.stringify({ address: '科技园南区 B栋 305' }),
+        },
+      ]
+    }
+  } finally {
+    loading.value = false
   }
 }
 
-const loadOrder = async () => {
-  const pages = getCurrentPages()
-  const currentPage = pages[pages.length - 1]
-  const orderId = currentPage.options?.orderId || currentPage.$page?.options?.orderId
-  if (!orderId) return
-  try {
-    order.value = await getOrderDetail(orderId) || {}
-    initDeliveryMap()
-  } catch (e) {}
+const loadMore = () => {
+  page.value++
+  loadOrders()
 }
 
-onMounted(loadOrder)
+const parseAddress = (snap) => {
+  if (!snap) return '收货地址'
+  try {
+    const obj = JSON.parse(snap)
+    return obj.address || snap
+  } catch { return snap }
+}
+
+const goDetail = (orderId) => {
+  uni.navigateTo({ url: `/pages/delivery/detail?orderId=${orderId}` })
+}
+
+const goHall = () => {
+  uni.switchTab({ url: '/pages/hall/index' })
+}
+
+onShow(() => loadOrders(true))
 </script>
 
-<style scoped>
-.delivery-page { min-height: 100vh; background: #f5f5f5; display: flex; flex-direction: column; }
-
-.map-area {
-  height: 45vh; background: #e8eef3; position: relative;
-}
-.delivery-map { width: 100%; height: 100%; }
-.map-placeholder { display: flex; flex-direction: column; align-items: center; }
-.map-back {
-  position: absolute; top: 80rpx; left: 30rpx;
-  width: 70rpx; height: 70rpx; background: #fff; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.1); z-index: 10;
-}
-.map-relocate {
-  position: absolute; bottom: 20rpx; left: 30rpx;
-  width: 70rpx; height: 70rpx; background: #fff; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.1); z-index: 10;
-}
-.map-legend {
-  position: absolute; bottom: 20rpx; right: 20rpx; background: rgba(255,255,255,0.95);
-  border-radius: 12rpx; padding: 12rpx 16rpx; display: flex; gap: 16rpx;
-  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.1); z-index: 10;
-}
-.legend-item { display: flex; align-items: center; gap: 6rpx; }
-.legend-dot { width: 16rpx; height: 16rpx; border-radius: 50%; }
-
-.detail-panel {
-  flex: 1; margin-top: -40rpx; background: #fff;
-  border-radius: 40rpx 40rpx 0 0; padding: 40rpx 30rpx;
-  box-shadow: 0 -8rpx 30rpx rgba(0,0,0,0.06);
+<style>
+.delivery-list-page {
+  min-height: 100vh;
+  background-color: #f9fafb;
+  padding-bottom: 200rpx;
 }
 
-.addr-section { margin-bottom: 30rpx; }
-.addr-row { display: flex; align-items: flex-start; gap: 20rpx; }
-.dot { width: 20rpx; height: 20rpx; border-radius: 50%; margin-top: 8rpx; flex-shrink: 0; }
-.dot-orange { background: #f59e0b; }
-.dot-green { background: #22c55e; }
-.addr-info { display: flex; flex-direction: column; gap: 4rpx; }
-.addr-label { font-size: 22rpx; }
-.addr-text { font-size: 28rpx; }
-.addr-line { width: 4rpx; height: 40rpx; background: #e8e8e8; margin-left: 8rpx; }
+/* Header */
+.list-header {
+  background: #1a1a2e;
+  padding: 100rpx 48rpx 48rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.header-title {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: white;
+}
+.stat-text {
+  font-size: 24rpx;
+  color: rgba(255,255,255,0.6);
+  background: rgba(255,255,255,0.1);
+  padding: 8rpx 20rpx;
+  border-radius: 20rpx;
+}
 
-.order-info-card {
-  background: #f8f9fa; border-radius: 20rpx; padding: 24rpx; margin-bottom: 30rpx;
+/* Order List */
+.order-list {
+  padding: 32rpx 32rpx;
+  height: calc(100vh - 260rpx);
+  box-sizing: border-box;
 }
-.info-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16rpx; }
-.info-orderNo { font-size: 26rpx; font-weight: bold; }
-.info-amount { font-size: 32rpx; font-weight: bold; color: #ff4400; }
-.info-rows { display: flex; flex-direction: column; gap: 12rpx; }
-.info-row { display: flex; justify-content: space-between; font-size: 26rpx; }
 
-.action-area { display: flex; gap: 20rpx; }
-.action-btn-secondary {
-  flex: 1; text-align: center; padding: 26rpx 0; border-radius: 16rpx;
-  background: #f5f5f5; color: #666; font-weight: bold; font-size: 28rpx;
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 120rpx 40rpx;
 }
-.action-btn-primary {
-  flex: 1.5; text-align: center; padding: 26rpx 0; border-radius: 16rpx;
-  background: #1a1a1a; color: #FFD100; font-weight: bold; font-size: 28rpx;
+.empty-icon-wrap {
+  width: 160rpx;
+  height: 160rpx;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 40rpx;
+  box-shadow: 0 8rpx 30rpx rgba(0,0,0,0.06);
 }
+.empty-icon { font-size: 64rpx; color: #d1d5db; }
+.empty-title { font-size: 34rpx; font-weight: bold; color: #374151; margin-bottom: 12rpx; }
+.empty-desc { font-size: 26rpx; color: #9ca3af; margin-bottom: 48rpx; text-align: center; }
+.go-hall-btn {
+  background: #1a1a2e;
+  color: #FFD100;
+  font-size: 28rpx;
+  font-weight: bold;
+  padding: 24rpx 64rpx;
+  border-radius: 48rpx;
+}
+
+/* Order Card */
+.order-card {
+  background: white;
+  border-radius: 32rpx;
+  padding: 36rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.05);
+  border: 1rpx solid #f3f4f6;
+}
+.order-card:active { transform: scale(0.99); }
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32rpx;
+}
+.order-no-wrap { display: flex; align-items: center; gap: 16rpx; }
+.order-no { font-size: 30rpx; font-weight: bold; color: #111827; }
+.status-badge {
+  font-size: 20rpx;
+  padding: 4rpx 14rpx;
+  border-radius: 8rpx;
+  font-weight: 500;
+}
+.badge-blue { background: #eff6ff; color: #3b82f6; }
+.badge-yellow { background: #fffbeb; color: #d97706; }
+.badge-green { background: #f0fdf4; color: #22c55e; }
+.badge-gray { background: #f9fafb; color: #9ca3af; }
+.order-fee { font-size: 34rpx; font-weight: bold; color: #ef4444; }
+
+/* Route Info */
+.route-info {
+  background: #f9fafb;
+  border-radius: 20rpx;
+  padding: 24rpx;
+  margin-bottom: 28rpx;
+}
+.route-point {
+  display: flex;
+  align-items: flex-start;
+  gap: 20rpx;
+}
+.point-dot {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 50%;
+  margin-top: 8rpx;
+  flex-shrink: 0;
+}
+.dot-blue { background: #3b82f6; box-shadow: 0 0 0 6rpx rgba(59,130,246,0.1); }
+.dot-orange { background: #f97316; box-shadow: 0 0 0 6rpx rgba(249,115,22,0.1); }
+.point-content { flex: 1; }
+.point-label { font-size: 20rpx; color: #9ca3af; display: block; margin-bottom: 4rpx; }
+.point-addr { font-size: 26rpx; font-weight: 500; color: #1f2937; }
+.route-connector {
+  width: 2rpx;
+  height: 24rpx;
+  background: #e5e7eb;
+  margin: 8rpx 0 8rpx 8rpx;
+}
+
+/* Footer */
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.footer-time {
+  font-size: 24rpx;
+  color: #9ca3af;
+}
+.footer-time .fa { margin-right: 6rpx; }
+.detail-btn {
+  font-size: 24rpx;
+  color: #3b82f6;
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+}
+.detail-btn .fa { font-size: 20rpx; }
+
+.loading-row {
+  text-align: center;
+  padding: 40rpx;
+  color: #9ca3af;
+  font-size: 26rpx;
+}
+.loading-row .fa { margin-right: 8rpx; }
 </style>

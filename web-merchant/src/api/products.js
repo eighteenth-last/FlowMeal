@@ -17,7 +17,7 @@ export const updateProduct = (id, data) =>
 
 /** 上架/下架 */
 export const toggleProductStatus = (id, status) =>
-  request.put(`/merchant/products/${id}/status`, { status })
+  request.put(`/merchant/products/${id}/status`, null, { params: { status } })
 
 /** 删除商品 */
 export const deleteProduct = (id) => request.delete(`/merchant/products/${id}`)

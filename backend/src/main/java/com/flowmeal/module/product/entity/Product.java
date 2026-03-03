@@ -1,9 +1,11 @@
 package com.flowmeal.module.product.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.flowmeal.common.entity.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.apache.ibatis.type.JdbcType;
 
 import java.math.BigDecimal;
 
@@ -19,6 +21,7 @@ public class Product extends BaseEntity {
     private Long categoryId;
     private String name;
     private String description;
+    @TableField(jdbcType = JdbcType.CLOB)
     private String image;
     private BigDecimal price;
     private BigDecimal discountPrice;

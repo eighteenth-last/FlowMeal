@@ -2,7 +2,8 @@
   "pages": [
     { "path": "pages/login/index", "style": { "navigationBarTitleText": "骑手登录", "navigationStyle": "custom" } },
     { "path": "pages/hall/index", "style": { "navigationBarTitleText": "抢单大厅", "navigationStyle": "custom" } },
-    { "path": "pages/delivery/index", "style": { "navigationBarTitleText": "配送详情", "navigationStyle": "custom" } },
+    { "path": "pages/delivery/index", "style": { "navigationBarTitleText": "配送中", "navigationStyle": "custom" } },
+    { "path": "pages/delivery/detail", "style": { "navigationBarTitleText": "配送详情", "navigationStyle": "custom" } },
     { "path": "pages/records/index", "style": { "navigationBarTitleText": "配送记录", "navigationStyle": "custom" } },
     { "path": "pages/profile/index", "style": { "navigationBarTitleText": "我的", "navigationStyle": "custom" } }
   ],
@@ -21,7 +22,8 @@
     "borderStyle": "white",
     "list": [
       { "pagePath": "pages/hall/index", "text": "大厅" },
-      { "pagePath": "pages/records/index", "text": "记录" },
+      { "pagePath": "pages/delivery/index", "text": "配送" },
+      { "pagePath": "pages/records/index", "text": "统计" },
       { "pagePath": "pages/profile/index", "text": "我的" }
     ]
   }

@@ -18,4 +18,7 @@ public class AlipayProperties {
     private String alipayPublicKey;
     private String notifyUrl;
     private String returnUrl;
+    /** RSA2 */
+    private String signType = "RSA2";
+    private String charset = "UTF-8";
 }

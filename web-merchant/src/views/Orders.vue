@@ -77,8 +77,9 @@
               <template v-if="selectedOrder.status === 'WAIT_MERCHANT_CONFIRM'">
                 <n-button type="primary" size="large" @click="accept(selectedOrder.id)">接 单</n-button>
                 <n-button type="error" size="large" @click="reject(selectedOrder.id)">拒 单</n-button>
-              </template>
-            </n-space>
+              </template>              <n-button size="large" @click="downloadReceipt(selectedOrder)">
+                🗈️ 打印小票
+              </n-button>            </n-space>
           </div>
         </n-card>
       </n-gi>
@@ -90,6 +91,7 @@
 import { ref, onMounted } from 'vue'
 import { useMessage } from 'naive-ui'
 import { getOrders, acceptOrder, rejectOrder, getOrderDetail } from '@/api/orders'
+import { printReceipt } from '@/utils/receipt'
 
 const message = useMessage()
 const activeTab = ref('WAIT_MERCHANT_CONFIRM')
@@ -158,6 +160,33 @@ const reject = async (id) => {
 
 const handleTabChange = () => loadOrders()
 onMounted(loadOrders)
+
+// ── 小票打印 ──────────────────────────────────────────
+const downloadReceipt = (order) => {
+  let addressText = null
+  try {
+    const s = JSON.parse(order.addressSnapshot || '{}')
+    if (s.type !== '线下收款') {
+      addressText = `${s.receiver || ''} ${s.phone || ''}  ${s.province || ''}${s.city || ''}${s.district || ''} ${s.detail || ''}`
+    }
+  } catch { /* ignore */ }
+
+  printReceipt({
+    orderNo:     order.orderNo,
+    createdAt:   order.createdAt,
+    paymentType: order.paymentType,
+    addressText,
+    remark:      (order.remark && order.remark !== 'POS线下订单') ? order.remark : null,
+    totalAmount: order.actualAmount ?? order.totalAmount,
+    deliveryFee: order.deliveryFee,
+    items: (order.items || []).map(i => ({
+      name:      i.productName,
+      qty:       i.quantity,
+      unitPrice: i.unitPrice,
+      subtotal:  i.subtotal
+    }))
+  })
+}
 </script>
 
 <style scoped>

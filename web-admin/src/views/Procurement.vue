@@ -68,30 +68,44 @@
 </template>
 
 <script setup>
-import { ref, reactive, h } from 'vue'
-import { useMessage, NTag } from 'naive-ui'
+import { ref, reactive, h, onMounted } from 'vue'
+import { useMessage, NTag, NButton, NSpace } from 'naive-ui'
+import request from '@/api/request'
 
 const message = useMessage()
 const loading = ref(false)
 const showCreate = ref(false)
+const submitLoading = ref(false)
 
-// 模拟数据
-const procList = ref([
-  { id: 1, supplier: '绿源食材', material: '大米', quantity: 500, unit: 'kg', status: 'PENDING', createdAt: '2024-01-10' },
-  { id: 2, supplier: '鲜味供应商', material: '食用油', quantity: 200, unit: 'L',  status: 'DELIVERED', createdAt: '2024-01-09' }
-])
+const procList = ref([])
 
-const consumeSummary = ref([
-  { name: '大米', used: 420, total: 500, unit: 'kg', percent: 84 },
-  { name: '食用油', used: 120, total: 200, unit: 'L',  percent: 60 },
-  { name: '蔬菜', used: 80,  total: 150, unit: 'kg', percent: 53 }
-])
+const consumeSummary = ref([])
 
-const supplierOptions = [
-  { label: '绿源食材', value: '绿源食材' },
-  { label: '鲜味供应商', value: '鲜味供应商' },
-  { label: '金鸿粮油', value: '金鸿粮油' }
-]
+const loadSummary = async () => {
+  try {
+    const res = await request.get('/admin/materials/summary') || []
+    const list = Array.isArray(res) ? res : (res?.records || [])
+    const maxConsumed = list.length ? Math.max(...list.map(i => i.totalConsumed)) : 1
+    consumeSummary.value = list.slice(0, 10).map(item => ({
+      name: item.materialName,
+      used: item.totalConsumed,
+      total: item.totalConsumed,  // 以累计消耗作为参考基准
+      unit: item.unit,
+      percent: Math.round((item.totalConsumed / maxConsumed) * 100)
+    }))
+  } catch { /* ignore */ }
+}
+
+const supplierOptions = ref([])
+
+const loadSuppliers = async () => {
+  try {
+    const list = await request.get('/admin/suppliers') || []
+    supplierOptions.value = list
+      .filter(s => s.status === 1)
+      .map(s => ({ label: s.name, value: s.name }))
+  } catch { /* ignore */ }
+}
 
 const unitOptions = [
   { label: 'kg', value: 'kg' },
@@ -102,11 +116,15 @@ const unitOptions = [
 
 const form = reactive({ supplier: null, materialName: '', quantity: 1, unit: 'kg', remark: '' })
 
-const statusMap = { PENDING: { type: 'warning', text: '待发货' }, DELIVERED: { type: 'success', text: '已到货' } }
+const statusMap = {
+  PENDING:   { type: 'warning', text: '待发货' },
+  SHIPPED:   { type: 'info',    text: '已发货' },
+  DELIVERED: { type: 'success', text: '已到货' }
+}
 
 const procColumns = [
   { title: '供应商', key: 'supplier' },
-  { title: '原料', key: 'material' },
+  { title: '原料', key: 'materialName' },
   { title: '数量', key: 'quantity', render: row => `${row.quantity}${row.unit}` },
   {
     title: '状态', key: 'status',
@@ -115,24 +133,65 @@ const procColumns = [
       return h(NTag, { type: s.type, size: 'small' }, { default: () => s.text })
     }
   },
+  {
+    title: '操作', key: 'actions',
+    render: row => row.status === 'PENDING'
+      ? h(NButton, { size: 'small', type: 'primary', onClick: () => markDelivered(row.id) }, { default: () => '确认到货' })
+      : null
+  },
   { title: '日期', key: 'createdAt' }
 ]
 
-const submitCreate = () => {
+const loadData = async () => {
+  loading.value = true
+  try {
+    const res = await request.get('/admin/procurement')
+    procList.value = res || []
+  } catch (e) {
+    message.error(e.message || '加载失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+const submitCreate = async () => {
   if (!form.supplier || !form.materialName) {
     message.warning('请填写完整信息')
     return
   }
-  procList.value.unshift({
-    id: Date.now(),
-    supplier: form.supplier,
-    material: form.materialName,
-    quantity: form.quantity,
-    unit: form.unit,
-    status: 'PENDING',
-    createdAt: new Date().toISOString().split('T')[0]
-  })
-  message.success('采购单创建成功')
-  showCreate.value = false
+  submitLoading.value = true
+  try {
+    await request.post('/admin/procurement', {
+      supplier: form.supplier,
+      materialName: form.materialName,
+      quantity: form.quantity,
+      unit: form.unit,
+      remark: form.remark
+    })
+    message.success('采购单创建成功')
+    showCreate.value = false
+    Object.assign(form, { supplier: null, materialName: '', quantity: 1, unit: 'kg', remark: '' })
+    loadData()
+  } catch (e) {
+    message.error(e.message || '创建失败')
+  } finally {
+    submitLoading.value = false
+  }
 }
+
+const markDelivered = async (id) => {
+  try {
+    await request.put(`/admin/procurement/${id}/status`, null, { params: { status: 'DELIVERED' } })
+    message.success('已标记为到货')
+    loadData()
+  } catch (e) {
+    message.error(e.message)
+  }
+}
+
+onMounted(() => {
+  loadData()
+  loadSuppliers()
+  loadSummary()
+})
 </script>

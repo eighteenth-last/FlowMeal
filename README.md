@@ -133,7 +133,7 @@ mvn clean install
 mvn spring-boot:run
 ```
 
-4. 访问 API 文档：http://localhost:8080/api/doc.html
+4. 访问 API 文档：http://localhost:8012/api/doc.html
 
 ### 前端启动
 

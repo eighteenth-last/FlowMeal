@@ -9,7 +9,7 @@ const request = (options) => {
       data: options.data,
       header: {
         'Content-Type': 'application/json',
-        satoken: token || '',
+        'Authorization': token || '',
         ...options.header
       },
       success: (res) => {

@@ -45,6 +45,18 @@ const routes = [
         meta: { title: '原料集中采购', icon: 'CubeOutline' }
       },
       {
+        path: 'suppliers',
+        name: 'Suppliers',
+        component: () => import('@/views/Suppliers.vue'),
+        meta: { title: '供应商管理', icon: 'BusinessOutline' }
+      },
+      {
+        path: 'materials',
+        name: 'Materials',
+        component: () => import('@/views/Materials.vue'),
+        meta: { title: '原料消耗上报', icon: 'NutritionOutline' }
+      },
+      {
         path: 'coupons',
         name: 'Coupons',
         component: () => import('@/views/Coupons.vue'),
@@ -61,8 +73,21 @@ const router = createRouter({
 })
 
 // 全局路由守卫
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   const auth = useAuthStore()
+
+  // 有本地 token 但尚未经过本次会话验证，先校验有效性
+  if (auth.token && !auth.verified) {
+    const valid = await auth.verifyToken()
+    if (!valid) return '/login'
+  }
+
+  // 已登录访问登录页 → 直接进入 dashboard
+  if (to.path === '/login' && auth.token) {
+    return '/dashboard'
+  }
+
+  // 需要认证但无 token → 跳登录
   if (to.meta.requiresAuth !== false && !auth.token) {
     return '/login'
   }

@@ -1,10 +1,12 @@
 import { defineStore } from 'pinia'
 import { adminLogin } from '@/api/auth'
+import request from '@/api/request'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     token: localStorage.getItem('fm_admin_token') || '',
-    userInfo: JSON.parse(localStorage.getItem('fm_admin_info') || 'null')
+    userInfo: JSON.parse(localStorage.getItem('fm_admin_info') || 'null'),
+    verified: false
   }),
 
   getters: {
@@ -19,8 +21,22 @@ export const useAuthStore = defineStore('auth', {
       const res = await adminLogin(data)
       this.token = res.token
       this.userInfo = res
+      this.verified = true
       localStorage.setItem('fm_admin_token', res.token)
       localStorage.setItem('fm_admin_info', JSON.stringify(res))
+    },
+
+    /** 校验本地缓存的 token 是否仍然有效 */
+    async verifyToken() {
+      if (!this.token) return false
+      try {
+        await request.get('/admin/dashboard')
+        this.verified = true
+        return true
+      } catch {
+        this.logout()
+        return false
+      }
     },
 
     logout() {

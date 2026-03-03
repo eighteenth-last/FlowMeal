@@ -20,6 +20,6 @@ public class FlowMealApplication {
                 " |_|   |_|\\___/ \\_/\\_/    /_/\\_(_)\\___\\__,_|_|\n" +
                 "                                                 \n" +
                 " 智慧订餐外卖平台 启动成功 \uD83C\uDF54\n" +
-                " API文档: http://localhost:8080/api/doc.html\n");
+                " API文档: http://localhost:8012/api/doc.html\n");
     }
 }
