@@ -1,6 +1,7 @@
 package com.flowmeal.module.order.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.flowmeal.module.order.dto.OrderDetailVO;
 import com.flowmeal.module.order.dto.PlaceOrderReq;
 import com.flowmeal.module.order.entity.Orders;
 
@@ -41,4 +42,7 @@ public interface OrderService {
 
     /** 查询订单详情 */
     Orders getOrderDetail(Long orderId);
+
+    /** 查询订单详情（含商家、骑手、商品明细） */
+    OrderDetailVO getOrderDetailVO(Long orderId);
 }

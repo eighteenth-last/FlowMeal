@@ -19,15 +19,14 @@
     "app-plus": { "titleNView": false }
   },
   "tabBar": {
-    "custom": true,
     "color": "#999999",
     "selectedColor": "#1a1a1a",
     "backgroundColor": "#ffffff",
     "borderStyle": "white",
     "list": [
-      { "pagePath": "pages/home/index", "text": "首页" },
-      { "pagePath": "pages/order-list/index", "text": "订单" },
-      { "pagePath": "pages/profile/index", "text": "我的" }
+      { "pagePath": "pages/home/index", "text": "首页", "iconPath": "static/shouye.png", "selectedIconPath": "static/shouye.png" },
+      { "pagePath": "pages/order-list/index", "text": "订单", "iconPath": "static/dingdan.png", "selectedIconPath": "static/dingdan.png" },
+      { "pagePath": "pages/profile/index", "text": "我的", "iconPath": "static/biaoqiankuozhan_wode-180.png", "selectedIconPath": "static/biaoqiankuozhan_wode-180.png" }
     ]
   }
 }

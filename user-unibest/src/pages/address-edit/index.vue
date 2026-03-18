@@ -27,7 +27,7 @@
       </view>
       <view class="form-item" @click="form.isDefault = form.isDefault === 1 ? 0 : 1">
         <text class="form-label">设为默认</text>
-        <text :class="'fa ' + (form.isDefault === 1 ? 'fa-toggle-on text-primary' : 'fa-toggle-off text-gray')" style="font-size:48rpx;"></text>
+        <image :src="form.isDefault === 1 ? '/static/toggle-on.png' : '/static/toggle-off.png'" style="width:48rpx;height:48rpx;" mode="aspectFit" />
       </view>
     </view>
 

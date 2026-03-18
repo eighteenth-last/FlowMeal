@@ -7,17 +7,11 @@ export default {
 </script>
 
 <style>
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
-
 page {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: #f8f9fa;
   color: #1a1a1a;
   font-size: 28rpx;
-}
-
-.fa, .fas, .far, .fab {
-  font-family: 'Font Awesome 6 Free', 'Font Awesome 6 Brands' !important;
 }
 
 /* 主题色 */

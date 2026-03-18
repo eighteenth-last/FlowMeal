@@ -3,7 +3,7 @@
     <!-- 顶部装饰 -->
     <view class="login-header">
       <view class="logo-wrap">
-        <text class="fa fa-bowl-food logo-icon"></text>
+        <image src="/static/bowl-food.png" class="logo-icon" mode="aspectFit" />
       </view>
       <text class="app-name">FlowMeal</text>
       <text class="app-desc">智慧订餐 · 美味到家</text>
@@ -12,11 +12,11 @@
     <!-- 登录表单 -->
     <view class="login-form">
       <view class="form-item">
-        <text class="fa fa-user form-icon"></text>
+        <image src="/static/User.png" class="form-icon" mode="aspectFit" />
         <input v-model="form.username" placeholder="请输入用户名" class="form-input" />
       </view>
       <view class="form-item">
-        <text class="fa fa-lock form-icon"></text>
+        <image src="/static/lock.png" class="form-icon" mode="aspectFit" />
         <input v-model="form.password" type="password" placeholder="请输入密码" class="form-input" />
       </view>
 
@@ -33,19 +33,19 @@
       <view class="register-modal" @click.stop>
         <text class="modal-title">用户注册</text>
         <view class="form-item">
-          <text class="fa fa-user form-icon"></text>
+          <image src="/static/User.png" class="form-icon" mode="aspectFit" />
           <input v-model="regForm.username" placeholder="用户名" class="form-input" />
         </view>
         <view class="form-item">
-          <text class="fa fa-phone form-icon"></text>
+          <image src="/static/phone.png" class="form-icon" mode="aspectFit" />
           <input v-model="regForm.phone" placeholder="手机号" class="form-input" />
         </view>
         <view class="form-item">
-          <text class="fa fa-lock form-icon"></text>
+          <image src="/static/lock.png" class="form-icon" mode="aspectFit" />
           <input v-model="regForm.password" type="password" placeholder="密码" class="form-input" />
         </view>
         <view class="form-item">
-          <text class="fa fa-smile form-icon"></text>
+          <image src="/static/Smile.png" class="form-icon" mode="aspectFit" />
           <input v-model="regForm.nickname" placeholder="昵称（选填）" class="form-input" />
         </view>
         <view class="btn-primary login-btn" @click="handleRegister">注 册</view>
@@ -112,7 +112,7 @@ const handleRegister = async () => {
   margin-bottom: 24rpx;
   box-shadow: 0 8rpx 30rpx rgba(0,0,0,0.1);
 }
-.logo-icon { font-size: 56rpx; color: #FFD100; }
+.logo-icon { width: 56rpx; height: 56rpx; }
 .app-name { font-size: 48rpx; font-weight: bold; color: #1a1a1a; }
 .app-desc { font-size: 26rpx; color: rgba(0,0,0,0.5); margin-top: 8rpx; }
 
@@ -127,7 +127,7 @@ const handleRegister = async () => {
   margin-bottom: 24rpx;
   border: 2rpx solid #f0f0f0;
 }
-.form-icon { font-size: 32rpx; color: #ccc; margin-right: 20rpx; width: 40rpx; text-align: center; }
+.form-icon { width: 32rpx; height: 32rpx; margin-right: 20rpx; flex-shrink: 0; }
 .form-input { flex: 1; font-size: 30rpx; }
 .login-btn { margin-top: 40rpx; }
 .register-link {

@@ -1,77 +1,62 @@
 <template>
   <view class="profile-page">
-    <!-- 个人头部 -->
     <view class="profile-header">
-      <view class="profile-top-actions">
-        <text class="fa fa-gear" style="font-size:36rpx;"></text>
-        <text class="fa fa-bell" style="font-size:36rpx;"></text>
+      <view class="header-actions">
+        <image src="/static/gear.png" class="action-icon" mode="aspectFit" />
+        <image src="/static/bell.png" class="action-icon" mode="aspectFit" />
       </view>
       <view class="profile-info">
         <view class="avatar-wrap">
-          <text class="fa fa-user" style="font-size:48rpx;color:#FFD100;"></text>
+          <image src="/static/User.png" class="avatar-img" mode="aspectFit" />
         </view>
-        <view class="user-info">
-          <text class="user-name">{{ userInfo.nickname || userInfo.username || '用户' }}</text>
-          <text class="user-phone text-gray">{{ userInfo.phone || '' }}</text>
-        </view>
-        <text class="fa fa-chevron-right text-gray"></text>
-      </view>
-    </view>
-
-    <!-- 订单快捷入口 -->
-    <view class="order-shortcut">
-      <view class="shortcut-title">
-        <text class="font-bold">我的订单</text>
-        <text class="text-gray" style="font-size:24rpx;" @click="goOrders('')">查看全部 <text class="fa fa-chevron-right" style="font-size:18rpx;"></text></text>
-      </view>
-      <view class="shortcut-grid">
-        <view class="shortcut-item" @click="goOrders('WAIT_PAY')">
-          <text class="fa fa-credit-card shortcut-icon"></text>
-          <text class="shortcut-text">待支付</text>
-        </view>
-        <view class="shortcut-item" @click="goOrders('WAIT_MERCHANT_CONFIRM')">
-          <text class="fa fa-hourglass-half shortcut-icon"></text>
-          <text class="shortcut-text">待接单</text>
-        </view>
-        <view class="shortcut-item" @click="goOrders('DELIVERING')">
-          <text class="fa fa-truck shortcut-icon"></text>
-          <text class="shortcut-text">配送中</text>
-        </view>
-        <view class="shortcut-item" @click="goOrders('COMPLETED')">
-          <text class="fa fa-circle-check shortcut-icon"></text>
-          <text class="shortcut-text">已完成</text>
+        <view class="user-detail">
+          <text class="user-name">{{ userInfo.nickname }}</text>
+          <text class="user-realname" v-if="userInfo.username">{{ userInfo.username }}</text>
+          <text class="user-phone" v-if="userInfo.phone">{{ maskPhone(userInfo.phone) }}
+            <image src="/static/chevronright.png" style="width:18rpx;height:18rpx;vertical-align:middle;" mode="aspectFit" />
+          </text>
         </view>
       </view>
     </view>
 
-    <!-- 功能菜单 -->
     <view class="menu-card">
       <view class="menu-item" @click="goAddress">
-        <text class="fa fa-location-dot menu-icon" style="color:#3b82f6;"></text>
+        <view class="menu-icon-wrap blue">
+          <image src="/static/dingwei.png" class="menu-icon" mode="aspectFit" />
+        </view>
         <text class="menu-text">收货地址</text>
-        <text class="fa fa-chevron-right text-gray" style="font-size:24rpx;"></text>
+        <image src="/static/chevronright.png" class="menu-arrow" mode="aspectFit" />
       </view>
       <view class="menu-item">
-        <text class="fa fa-ticket menu-icon" style="color:#f59e0b;"></text>
-        <text class="menu-text">优惠券</text>
-        <text class="fa fa-chevron-right text-gray" style="font-size:24rpx;"></text>
+        <view class="menu-icon-wrap orange">
+          <image src="/static/star.png" class="menu-icon" mode="aspectFit" />
+        </view>
+        <text class="menu-text">我的评价</text>
+        <image src="/static/chevronright.png" class="menu-arrow" mode="aspectFit" />
       </view>
-      <view class="menu-item">
-        <text class="fa fa-headset menu-icon" style="color:#22c55e;"></text>
-        <text class="menu-text">客服中心</text>
-        <text class="fa fa-chevron-right text-gray" style="font-size:24rpx;"></text>
-      </view>
-      <view class="menu-item">
-        <text class="fa fa-circle-info menu-icon" style="color:#8b5cf6;"></text>
-        <text class="menu-text">关于我们</text>
-        <text class="fa fa-chevron-right text-gray" style="font-size:24rpx;"></text>
+      <view class="menu-item" style="border-bottom: none;">
+        <view class="menu-icon-wrap green">
+          <image src="/static/headset.png" class="menu-icon" mode="aspectFit" />
+        </view>
+        <text class="menu-text">我的客服</text>
+        <image src="/static/chevronright.png" class="menu-arrow" mode="aspectFit" />
       </view>
     </view>
 
-    <!-- 退出登录 -->
-    <view class="logout-btn" @click="handleLogout">退出登录</view>
+    <view class="business-entry">
+      <view class="business-left">
+        <view class="business-icon">
+          <image src="/static/store.png" class="menu-icon" mode="aspectFit" />
+        </view>
+        <view class="business-info">
+          <text class="business-title">商家入驻</text>
+          <text class="business-sub">零门槛开店，快速盈利</text>
+        </view>
+      </view>
+      <view class="business-btn">去申请</view>
+    </view>
 
-    <CustomTabBar :current="2" />
+    <view class="logout-btn" @click="handleLogout">退出登录</view>
   </view>
 </template>
 
@@ -80,13 +65,13 @@ import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { getUserInfo } from '@/api/user'
 import { logout } from '@/api/auth'
-import CustomTabBar from '@/components/CustomTabBar.vue'
 
 const authStore = useAuthStore()
 const userInfo = ref(authStore.userInfo || {})
 
-const goOrders = (status) => {
-  uni.switchTab({ url: '/pages/order-list/index' })
+const maskPhone = (phone) => {
+  if (!phone) return ''
+  return phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')
 }
 
 const goAddress = () => {
@@ -108,50 +93,65 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.profile-page { min-height: 100vh; background: #f8f9fa; padding-bottom: 100rpx; }
+.profile-page { min-height: 100vh; background: #f8f9fa; padding-bottom: 120rpx; }
 
 .profile-header {
-  background: linear-gradient(135deg, #FFD100 0%, #FFE550 100%);
-  padding: 60rpx 30rpx 80rpx;
-  border-radius: 0 0 60rpx 60rpx;
+  background: rgb(255, 209, 0);
+  padding: 0 30rpx 60rpx;
+  padding-top: calc(var(--status-bar-height) + 20rpx);
+  border-radius: 0 0 50rpx 50rpx;
 }
-.profile-top-actions {
-  display: flex; justify-content: flex-end; gap: 30rpx; padding-top: 40rpx; margin-bottom: 30rpx;
-}
+.header-actions { display: flex; justify-content: flex-end; gap: 30rpx; padding-top: 20rpx; margin-bottom: 40rpx; }
+.action-icon { width: 40rpx; height: 40rpx; }
 .profile-info { display: flex; align-items: center; gap: 24rpx; }
 .avatar-wrap {
-  width: 110rpx; height: 110rpx; background: #fff; border-radius: 50%;
+  width: 120rpx; height: 120rpx; border-radius: 50%;
+  border: 4rpx solid #1a1a1a; background: #fff; overflow: hidden;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.1);
 }
-.user-info { flex: 1; display: flex; flex-direction: column; gap: 6rpx; }
-.user-name { font-size: 36rpx; font-weight: bold; }
-.user-phone { font-size: 24rpx; }
-
-.order-shortcut {
-  margin: -40rpx 30rpx 0; background: #fff; border-radius: 24rpx;
-  padding: 30rpx; box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.06); position: relative; z-index: 10;
-}
-.shortcut-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24rpx; }
-.shortcut-grid { display: flex; justify-content: space-around; }
-.shortcut-item { display: flex; flex-direction: column; align-items: center; gap: 10rpx; }
-.shortcut-icon { font-size: 40rpx; color: #1a1a1a; }
-.shortcut-text { font-size: 24rpx; color: #666; }
+.avatar-img { width: 80rpx; height: 80rpx; }
+.user-detail { display: flex; flex-direction: column; gap: 6rpx; }
+.user-name { font-size: 40rpx; font-weight: bold; }
+.user-realname { font-size: 26rpx; opacity: 0.75; }
+.user-phone { font-size: 26rpx; opacity: 0.8; display: flex; align-items: center; gap: 6rpx; }
 
 .menu-card {
-  margin: 30rpx; background: #fff; border-radius: 24rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04); overflow: hidden;
+  margin: 30rpx; background: #fff; border-radius: 30rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04); overflow: hidden; padding: 8rpx;
 }
-.menu-item {
-  display: flex; align-items: center; padding: 30rpx; border-bottom: 2rpx solid #f8f8f8;
+.menu-item { display: flex; align-items: center; padding: 28rpx 20rpx; border-bottom: 2rpx solid #f8f8f8; }
+.menu-icon-wrap {
+  width: 64rpx; height: 64rpx; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; margin-right: 24rpx;
 }
-.menu-item:last-child { border-bottom: none; }
-.menu-icon { font-size: 32rpx; width: 50rpx; text-align: center; margin-right: 20rpx; }
-.menu-text { flex: 1; font-size: 28rpx; }
+.menu-icon-wrap.blue { background: #eff6ff; }
+.menu-icon-wrap.orange { background: #fff7ed; }
+.menu-icon-wrap.green { background: #f0fdf4; }
+.menu-icon { width: 32rpx; height: 32rpx; }
+.menu-text { flex: 1; font-size: 28rpx; font-weight: 500; }
+.menu-arrow { width: 24rpx; height: 24rpx; opacity: 0.3; }
+
+.business-entry {
+  margin: 0 30rpx 30rpx; background: #fff; border-radius: 30rpx;
+  padding: 30rpx; box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.business-left { display: flex; align-items: center; gap: 20rpx; }
+.business-icon {
+  width: 80rpx; height: 80rpx; background: rgb(255,209,0);
+  border-radius: 20rpx; display: flex; align-items: center; justify-content: center;
+}
+.business-info { display: flex; flex-direction: column; gap: 6rpx; }
+.business-title { font-size: 28rpx; font-weight: bold; }
+.business-sub { font-size: 22rpx; color: #999; }
+.business-btn {
+  background: #1a1a1a; color: #fff; font-size: 24rpx; font-weight: bold;
+  padding: 14rpx 30rpx; border-radius: 999rpx;
+}
 
 .logout-btn {
-  margin: 40rpx 30rpx; background: #fff; text-align: center; padding: 28rpx;
-  border-radius: 16rpx; color: #ef4444; font-weight: bold; font-size: 28rpx;
+  margin: 0 30rpx 40rpx; background: #fff; text-align: center; padding: 30rpx;
+  border-radius: 24rpx; color: #ef4444; font-weight: bold; font-size: 28rpx;
   box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
 }
 </style>

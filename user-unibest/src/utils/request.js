@@ -1,15 +1,23 @@
 /**
  * uni-app 统一请求封装
  */
-const BASE_URL = '/api'
+// H5 走 vite proxy（相对路径），小程序需要完整地址
+let BASE_URL = '/api'
+// #ifdef MP-WEIXIN
+BASE_URL = 'http://localhost:8012/api'
+// #endif
 
 const request = (options) => {
   return new Promise((resolve, reject) => {
     const token = uni.getStorageSync('fm_user_token')
+    // 过滤掉值为 undefined/null 的参数，防止序列化成 "undefined" 字符串
+    const data = options.data
+      ? Object.fromEntries(Object.entries(options.data).filter(([, v]) => v !== undefined && v !== null))
+      : undefined
     uni.request({
       url: BASE_URL + options.url,
       method: options.method || 'GET',
-      data: options.data,
+      data,
       header: {
         'Content-Type': 'application/json',
         ...(token ? { 'Authorization': token } : {}),

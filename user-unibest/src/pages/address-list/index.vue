@@ -10,18 +10,18 @@
         <text class="addr-detail text-gray">{{ addr.province }}{{ addr.city }}{{ addr.district }} {{ addr.detail }}</text>
       </view>
       <view class="addr-actions">
-        <text class="fa fa-pen action-icon" @click.stop="editAddr(addr)"></text>
-        <text class="fa fa-trash action-icon" style="color:#ef4444;" @click.stop="delAddr(addr)"></text>
+        <image src="/static/pen-edit.png" class="action-icon" style="width:28rpx;height:28rpx;" mode="aspectFit" @click.stop="editAddr(addr)" />
+        <image src="/static/trash.png" class="action-icon" style="width:28rpx;height:28rpx;" mode="aspectFit" @click.stop="delAddr(addr)" />
       </view>
     </view>
 
     <view v-if="addresses.length === 0" class="empty-tip">
-      <text class="fa fa-map-marker-alt" style="font-size:64rpx;color:#ddd;"></text>
+      <image src="/static/dingwei.png" style="width:64rpx;height:64rpx;" mode="aspectFit" />
       <text class="text-gray">暂无收货地址</text>
     </view>
 
     <view class="add-btn" @click="addNew">
-      <text class="fa fa-plus" style="margin-right:10rpx;"></text>
+      <image src="/static/plus.png" style="width:28rpx;height:28rpx;margin-right:10rpx;vertical-align:middle;" mode="aspectFit" />
       新增收货地址
     </view>
   </view>

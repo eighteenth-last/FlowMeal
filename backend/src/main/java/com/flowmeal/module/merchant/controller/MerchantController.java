@@ -49,7 +49,9 @@ public class MerchantController {
             @RequestParam(required = false) String keyword) {
         LambdaQueryWrapper<Merchant> wrapper = new LambdaQueryWrapper<Merchant>()
                 .eq(Merchant::getAuditStatus, 1).orderByDesc(Merchant::getStatus);
-        if (keyword != null && !keyword.isBlank()) wrapper.like(Merchant::getShopName, keyword);
+        if (keyword != null && !keyword.isBlank() && !keyword.equals("undefined") && !keyword.equals("null")) {
+            wrapper.like(Merchant::getShopName, keyword);
+        }
         Page<Merchant> result = merchantMapper.selectPage(new Page<>(page, size), wrapper);
         result.getRecords().forEach(m -> m.setPassword(null));
         return Result.success(result);

@@ -9,6 +9,7 @@ import com.flowmeal.common.exception.BusinessException;
 import com.flowmeal.common.result.ResultCode;
 import com.flowmeal.module.merchant.entity.Merchant;
 import com.flowmeal.module.merchant.mapper.MerchantMapper;
+import com.flowmeal.module.order.dto.OrderDetailVO;
 import com.flowmeal.module.order.dto.PlaceOrderReq;
 import com.flowmeal.module.order.entity.OrderItem;
 import com.flowmeal.module.order.entity.Orders;
@@ -318,6 +319,61 @@ public class OrderServiceImpl implements OrderService {
         Orders order = ordersMapper.selectById(orderId);
         checkOrderExists(order);
         return order;
+    }
+
+    @Override
+    public OrderDetailVO getOrderDetailVO(Long orderId) {
+        Orders order = ordersMapper.selectById(orderId);
+        checkOrderExists(order);
+
+        OrderDetailVO vo = new OrderDetailVO();
+        // copy all fields from Orders
+        vo.setId(order.getId());
+        vo.setOrderNo(order.getOrderNo());
+        vo.setUserId(order.getUserId());
+        vo.setMerchantId(order.getMerchantId());
+        vo.setRiderId(order.getRiderId());
+        vo.setAddressId(order.getAddressId());
+        vo.setAddressSnapshot(order.getAddressSnapshot());
+        vo.setTotalAmount(order.getTotalAmount());
+        vo.setDeliveryFee(order.getDeliveryFee());
+        vo.setActualAmount(order.getActualAmount());
+        vo.setRemark(order.getRemark());
+        vo.setStatus(order.getStatus());
+        vo.setCancelReason(order.getCancelReason());
+        vo.setRejectReason(order.getRejectReason());
+        vo.setPayTime(order.getPayTime());
+        vo.setAcceptTime(order.getAcceptTime());
+        vo.setPickUpTime(order.getPickUpTime());
+        vo.setDeliverTime(order.getDeliverTime());
+        vo.setCompleteTime(order.getCompleteTime());
+        vo.setPaymentType(order.getPaymentType());
+        vo.setTradeNo(order.getTradeNo());
+        vo.setCreatedAt(order.getCreatedAt());
+        vo.setUpdatedAt(order.getUpdatedAt());
+
+        // enrich merchant info
+        Merchant merchant = merchantMapper.selectById(order.getMerchantId());
+        if (merchant != null) {
+            vo.setShopName(merchant.getShopName());
+            vo.setShopAvatar(merchant.getAvatar());
+        }
+
+        // enrich rider info
+        if (order.getRiderId() != null) {
+            com.flowmeal.module.rider.entity.Rider rider = riderMapper.selectById(order.getRiderId());
+            if (rider != null) {
+                vo.setRiderName(rider.getRealName());
+                vo.setRiderPhone(rider.getPhone());
+            }
+        }
+
+        // enrich order items
+        List<OrderItem> items = orderItemMapper.selectList(
+                new LambdaQueryWrapper<OrderItem>().eq(OrderItem::getOrderId, orderId));
+        vo.setItems(items);
+
+        return vo;
     }
 
     // ========== 私有方法 ==========

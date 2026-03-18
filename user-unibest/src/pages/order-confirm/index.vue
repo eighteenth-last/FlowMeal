@@ -4,23 +4,23 @@
     <view class="address-card" @click="goAddressList">
       <view v-if="address" class="addr-info">
         <view class="addr-top">
-          <text class="fa fa-location-dot" style="color:#FFD100;font-size:32rpx;margin-right:12rpx;"></text>
+          <image src="/static/dingwei.png" style="width:32rpx;height:32rpx;margin-right:12rpx;" mode="aspectFit" />
           <text class="addr-name">{{ address.receiver }}</text>
           <text class="addr-phone text-gray">{{ address.phone }}</text>
         </view>
         <text class="addr-detail text-gray">{{ address.province }}{{ address.city }}{{ address.district }} {{ address.detail }}</text>
       </view>
       <view v-else class="addr-empty">
-        <text class="fa fa-plus-circle" style="color:#FFD100;font-size:36rpx;margin-right:12rpx;"></text>
+        <image src="/static/plus.png" style="width:36rpx;height:36rpx;margin-right:12rpx;" mode="aspectFit" />
         <text>请选择收货地址</text>
       </view>
-      <text class="fa fa-chevron-right text-gray"></text>
+      <image src="/static/chevronright.png" class="text-gray" style="width:24rpx;height:24rpx;" mode="aspectFit" />
     </view>
 
     <!-- 商品清单 -->
     <view class="card">
       <view class="card-title">
-        <text class="fa fa-store" style="color:#FFD100;margin-right:10rpx;"></text>
+        <image src="/static/store.png" style="width:28rpx;height:28rpx;margin-right:10rpx;" mode="aspectFit" />
         {{ cartStore.merchantName }}
       </view>
       <view class="order-item" v-for="item in cartStore.items" :key="item.productId">
@@ -38,7 +38,7 @@
     <!-- 备注 -->
     <view class="card">
       <view class="remark-row">
-        <text class="fa fa-pen" style="color:#FFD100;margin-right:12rpx;"></text>
+        <image src="/static/pen-edit.png" style="width:28rpx;height:28rpx;margin-right:12rpx;" mode="aspectFit" />
         <input v-model="remark" placeholder="备注（选填，如少辣、多放醋等）" class="remark-input" />
       </view>
     </view>
@@ -117,10 +117,10 @@ const handleSubmit = async () => {
         return
       }
     } catch (_) {}
-    // fallback: 直接跳订单追踪
+    // fallback: 跳订单列表
     uni.showToast({ title: '下单成功', icon: 'success' })
     setTimeout(() => {
-      uni.redirectTo({ url: `/pages/order-track/index?orderNo=${orderNo}` })
+      uni.switchTab({ url: '/pages/order-list/index' })
     }, 1000)
   } catch (e) {
     console.error(e)

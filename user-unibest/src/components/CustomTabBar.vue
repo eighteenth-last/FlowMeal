@@ -7,7 +7,7 @@
       :class="{ active: currentIndex === index }"
       @click="switchTab(tab, index)"
     >
-      <text :class="'fa ' + tab.icon" class="tab-icon"></text>
+      <image :src="currentIndex === index ? tab.iconActive : tab.icon" class="tab-icon" mode="aspectFit" />
       <text class="tab-text">{{ tab.text }}</text>
     </view>
   </view>
@@ -25,9 +25,9 @@ const currentIndex = ref(props.current)
 watch(() => props.current, (val) => { currentIndex.value = val })
 
 const tabs = [
-  { pagePath: '/pages/home/index', text: '首页', icon: 'fa-house' },
-  { pagePath: '/pages/order-list/index', text: '订单', icon: 'fa-receipt' },
-  { pagePath: '/pages/profile/index', text: '我的', icon: 'fa-user' }
+  { pagePath: '/pages/home/index', text: '首页', icon: '/static/shouye.png', iconActive: '/static/shouye.png' },
+  { pagePath: '/pages/order-list/index', text: '订单', icon: '/static/dingdan.png', iconActive: '/static/dingdan.png' },
+  { pagePath: '/pages/profile/index', text: '我的', icon: '/static/biaoqiankuozhan_wode-180.png', iconActive: '/static/biaoqiankuozhan_wode-180.png' }
 ]
 
 const switchTab = (tab, index) => {
@@ -59,20 +59,18 @@ const switchTab = (tab, index) => {
   justify-content: center;
   flex: 1;
   gap: 4rpx;
-  transition: all 0.2s;
 }
 .tab-icon {
-  font-size: 40rpx;
-  color: #999;
-  transition: color 0.2s;
+  width: 44rpx;
+  height: 44rpx;
+  opacity: 0.4;
 }
 .tab-text {
   font-size: 20rpx;
   color: #999;
-  transition: color 0.2s;
 }
 .tab-item.active .tab-icon {
-  color: #1a1a1a;
+  opacity: 1;
 }
 .tab-item.active .tab-text {
   color: #1a1a1a;
